@@ -1,0 +1,25 @@
+name: Deploy Static Website to S3
+
+on:
+  push:
+    branches:
+      - main   # Triggers workflow on push to 'main' branch
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest  # Runs the workflow on an Ubuntu runner
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3  # Checkout the repository
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v2  # Configures AWS Credentials for the workflow
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}  # Retrieve AWS key from GitHub secrets
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}  # Retrieve AWS secret key from GitHub secrets
+          aws-region: ap-south-1  # AWS region (ap-south-1 is for Mumbai region)
+
+      - name: Sync Files to S3
+        run: |
+          aws s3 sync . s3://project1adityabucket --delete  # Sync all files to the specified S3 bucket. '--delete' removes files from S3 that no longer exist in the repo
