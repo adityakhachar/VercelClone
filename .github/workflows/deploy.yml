@@ -1,25 +1,38 @@
+# Name of the workflow, as it appears in the GitHub Actions dashboard
 name: Deploy Static Website to S3
 
+# Trigger the workflow on any push to the 'main' branch
 on:
   push:
     branches:
-      - main   # Triggers workflow on push to 'main' branch
+      - main   # Specifies the branch to monitor for changes (e.g., 'main')
 
+# Define the jobs to execute in the workflow
 jobs:
   deploy:
-    runs-on: ubuntu-latest  # Runs the workflow on an Ubuntu runner
+    # Specify the environment for running the job (GitHub-hosted Ubuntu runner)
+    runs-on: ubuntu-latest  # This means the workflow will run on an Ubuntu virtual machine
 
+    # Steps to execute in the 'deploy' job
     steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v3  # Checkout the repository
+      # Step 1: Check out the repository code
+      - name: Checkout Repository  # Step description for clarity in the GitHub Actions logs
+        uses: actions/checkout@v3  # Prebuilt action to clone the repository code into the runner
 
-      - name: Configure AWS Credentials
-        uses: aws-actions/configure-aws-credentials@v2  # Configures AWS Credentials for the workflow
+      # Step 2: Configure AWS credentials to authenticate with AWS services
+      - name: Configure AWS Credentials  # Step description
+        uses: aws-actions/configure-aws-credentials@v2  # Action to set up AWS CLI credentials
         with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}  # Retrieve AWS key from GitHub secrets
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}  # Retrieve AWS secret key from GitHub secrets
-          aws-region: ap-south-1  # AWS region (ap-south-1 is for Mumbai region)
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}  # Fetch AWS Access Key ID from GitHub Secrets
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}  # Fetch AWS Secret Key from GitHub Secrets
+          aws-region: ap-south-1  # AWS region where the S3 bucket is located (ap-south-1 = Mumbai)
 
-      - name: Sync Files to S3
-        run: |
-          aws s3 sync . s3://project1adityabucket --delete  # Sync all files to the specified S3 bucket. '--delete' removes files from S3 that no longer exist in the repo
+      # Step 3: Sync the repository files to the specified S3 bucket
+      - name: Sync Files to S3  # Step description
+        run: |  # Run the following shell command in the Ubuntu runner
+          aws s3 sync . s3://project1adityabucket --delete  # Sync current directory to S3 bucket
+          # Explanation of the command:
+          # - 'aws s3 sync': Command to synchronize files
+          # - '.': The current working directory in the runner
+          # - 's3://project1adityabucket': Target S3 bucket
+          # - '--delete': Ensures that files removed locally are also deleted from the S3 bucket
